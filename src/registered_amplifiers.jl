@@ -1,0 +1,1 @@
+register_amplifier(SimpleAmplifier("30DV300", 0.0V, 10.0V, 15.0, -20.0V, 0.15A)) #used on OCPI2. Note that there are really two current channels (one per piezo stack) with a max amperage of 150mA each.  Therefore the true current calculation is more complicated than we acknowledge, but it should be about the same.

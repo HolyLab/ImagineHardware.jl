@@ -1,5 +1,7 @@
 using ImagineHardware
 using Base.Test
 
-# write your own tests here
-@test 1 == 2
+include("piezos.jl")
+include("amplifiers.jl")
+include("pid.jl")
+include("piezosystems.jl")
