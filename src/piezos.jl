@@ -31,21 +31,6 @@ mon_slope(p::Piezo, is_cl::Bool) = vspan_out(p, is_cl) / pspan(p, is_cl) #Volts 
 closed_loop_pad(p::Piezo) = p.closed_loop_pad
 vmin_out(p::Piezo, is_cl::Bool) = p.vmin_out
 vmax_out(p::Piezo, is_cl::Bool) = p.vmax_out
-#function vmin_out(p::Piezo, is_cl::Bool)
-#    if is_cl
-#        return p.vmin_out + mon_slope(p, is_cl) * closed_loop_pad(p)
-#    else
-#        return p.vmin_out
-#    end
-#end
-#
-#function vmax_out(p::Piezo, is_cl::Bool)
-#    if is_cl
-#        return p.vmax_out - mon_slope(p, is_cl) * closed_loop_pad(p)
-#    else
-#        return p.vmax_out
-#    end
-#end
 vspan_out(p::Piezo, is_cl::Bool) = vmax_out(p, is_cl) - vmin_out(p, is_cl)
 
 pmin(p::Piezo, is_cl::Bool) = is_cl ? p.pmin_ol + closed_loop_pad(p) : p.pmin_ol
@@ -54,8 +39,8 @@ pspan(p::Piezo, is_cl::Bool) = pmax(p, is_cl) - pmin(p, is_cl)
 
 blocked_pad(p::Piezo) = (max_displacement(p) - pspan(p, false))/2 #If the max nominal displacement is greater than the open loop span of the piezo then there is a region that is blocked.  This is the half-size of the total blocked distance
 function closed2open(pclosed::HasLengthUnits, p::Piezo)
-    if pclosed < pmin(p, true) || pclosed > pmax(p, true)
-        error("The input is not within the valid closed-loop range of the piezo")
+    if pclosed < pmin(p, false) || pclosed > pmax(p, false)
+        error("The input is not within the valid range of the piezo")
     end
     return pmin(p, false) + closed_loop_pad(p) + pclosed
 end
@@ -105,11 +90,8 @@ function pos2mon(pos::HasLengthUnits, p::Piezo, is_cl::Bool)
     clp = closed_loop_pad(p)
     max_p = pmax(p, is_cl) 
     min_p = pmin(p, is_cl)
-    if pos < min_p || pos > max_p
-        if !is_cl
-            error("Position lies outside the valid open-loop position range of this piezo.")
-        end
-        error("Position lies outside the valid closed-loop position range of this piezo.")
+    if pos < pmin(p, false) || pos > pmax(p, false)
+        error("Position lies outside the valid position range of this piezo.")
     end
     pos_frac = (pos - min_p) / (max_p - min_p)
     return vmin_out(p, is_cl) + pos_frac * vspan_out(p, is_cl)
@@ -197,14 +179,6 @@ pos2input(pos::HasLengthUnits, p::Piezo, is_cl::Bool) = displacement2input(pos2d
 #adjusted_displacement = mon_displacement + compression
 #                  = mon_displacement + f / stiffness(p)
 mon2displacement(mon::HasVoltageUnits, p::Piezo, is_cl::Bool, f::HasForceUnits) = pos2displacement(mon2pos(mon, p, is_cl), p, is_cl, f)
-#function mon2displacement(mon::HasVoltageUnits, p::Piezo, is_cl::Bool, f::HasForceUnits)
-#    pos = mon2pos(mon, p, is_cl)
-#    if is_cl
-#        pos = closed2open(pos, p)
-#    end
-#    check_disp_extrema(pos, p; only_warn=true)
-#    return unsafe_pos2displacement(mon2pos(mon, p, is_cl), p, f)
-#end
 
 mon2displacement(mon::HasVoltageUnits, p::Piezo, is_cl::Bool) = mon2displacement(mon, p, is_cl, 0.0N)
 
