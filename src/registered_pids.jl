@@ -1,1 +1,1 @@
-register_pid(PidController(0.7, 0.8Hz, 0.2s, 50000.0Hz), "ocpi-2")
+register_pid(PidController(1.0, 20.0Hz, (1/100.0)s, 50000.0Hz), "ocpi-2")
