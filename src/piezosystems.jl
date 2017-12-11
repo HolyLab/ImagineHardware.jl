@@ -1,7 +1,7 @@
-immutable PiezoSystem{T}
-    amp::SimpleAmplifier{T}
-    piezo::Piezo{T}
-    pid::PidController{T}
+immutable PiezoSystem
+    amp::SimpleAmplifier
+    piezo::Piezo
+    pid::PidController
 end
 
 amplifier(ps::PiezoSystem) = ps.amp
