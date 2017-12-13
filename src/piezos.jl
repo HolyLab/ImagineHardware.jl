@@ -5,23 +5,25 @@ abstract type AbstractPositioner end
 
 #Linear translation piezo device (one-dimension of motion only)
 #TODO: add coefficient of friction? (should be very small)
-struct Piezo{T} <: AbstractPositioner
+
+struct Piezo <: AbstractPositioner
     id::String
-    vmin_in::HasVoltageUnits{T} #min acceptable amplifier input
-    vmax_in::HasVoltageUnits{T} #max acceptable amplifier input
-    vmin_out::HasVoltageUnits{T} #min MON (sensor) output
-    vmax_out::HasVoltageUnits{T} #max MON (sensor) output
-    pmin_ol::HasLengthUnits{T} #min position in open loop
-    pmax_ol::HasLengthUnits{T}
-    closed_loop_pad::HasLengthUnits{T} #Amount of the motion range that becomes inaccessible in closed loop mode.  This applies equally to the low and high side, so the total loss in range is twice this amount
-    max_disp::HasLengthUnits{T} #nominal max displacement.  One might expect this to be the same as the open loop range, but this contradicts the
+    vmin_in::typeof(0.0V) #min acceptable amplifier input
+    vmax_in::typeof(0.0V) #max acceptable amplifier input
+    vmin_out::typeof(0.0V) #min MON (sensor) output
+    vmax_out::typeof(0.0V) #max MON (sensor) output
+    pmin_ol::typeof(0.0μm) #min position in open loop
+    pmax_ol::typeof(0.0μm)
+    closed_loop_pad::typeof(0.0μm) #Amount of the motion range that becomes inaccessible in closed loop mode.  This applies equally to the low and high side, so the total loss in range is twice this amount
+    max_disp::typeof(0.0μm) #nominal max displacement.  One might expect this to be the same as the open loop range, but this contradicts the
                                 #force specificatinos of our piezo.  (see below and more thoughts at the end of this file)
-    cap::HasCapacitanceUnits{T}
+    cap::typeof(0.0μF)
     motion_axis::Int
-    effective_mass::HasMassUnits{T}
-    resonance_freqs::NTuple{3,HasInverseTimeUnits{T}} #resonance frequency without load (decreases with load, avoid operating at greater than 80% of resonant frequency)
-    stiffs::NTuple{3, HasStiffnessUnits{T}} #actuator stiffness
+    effective_mass::typeof(0.0g)
+    resonance_freqs::NTuple{3, typeof(0.0Hz)} #resonance frequency without load (decreases with load, avoid operating at greater than 80% of resonant frequency)
+    stiffs::NTuple{3, typeof(0.0N/μm)} #actuator stiffness
 end
+
 
 name(p::Piezo) = p.id
 vmin_in(p::Piezo) = p.vmin_in
@@ -123,7 +125,7 @@ end
 displacement2pos(d::HasLengthUnits, p::Piezo, is_cl::Bool, f::HasForceUnits) = displacement2pos(d + uconvert(unit(d), f/stiffness(p)), p, is_cl)
 
 function check_disp_extrema(pos::HasLengthUnits, p::Piezo; only_warn = false)
-    if isapprox(pos, pmin(p, false)) || isapprox(pos, pmax(p, false))
+    if pos <= pmin(p, false) || pos >= pmax(p, false)
         f = only_warn ? warn : error
         f("The nominal displacement can't reliably be calculated from the position when position reaches the extremes of the operating range")
     end

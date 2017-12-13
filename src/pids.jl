@@ -1,8 +1,9 @@
-mutable struct PidController{T}
-    kp::T
-    ki::HasInverseTimeUnits{T}
-    kd::HasTimeUnits{T}
-    sample_rate::HasInverseTimeUnits{T}
+
+mutable struct PidController
+    kp::Float64
+    ki::typeof(0.0Hz)
+    kd::typeof(0.0s)
+    sample_rate::typeof(0.0Hz)
 end
 
 samprate(pc::PidController) = pc.sample_rate
