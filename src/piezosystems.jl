@@ -1,4 +1,4 @@
-immutable PiezoSystem
+struct PiezoSystem
     amp::SimpleAmplifier
     piezo::Piezo
     pid::PidController

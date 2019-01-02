@@ -1,6 +1,6 @@
 abstract type AbstractAmplifier end
 
-immutable SimpleAmplifier <: AbstractAmplifier
+struct SimpleAmplifier <: AbstractAmplifier
     name::String
     in_min::typeof(0.0V)
     in_max::typeof(0.0V)
