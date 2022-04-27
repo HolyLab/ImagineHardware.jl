@@ -5,3 +5,6 @@ version = "0.1.0"
 [deps]
 UnitAliases = "96ae54c0-0dff-11e9-11b2-27e67f6cc5ea"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+
+[compat]
+Unitful = "1"
